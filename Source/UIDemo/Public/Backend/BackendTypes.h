@@ -13,7 +13,12 @@ enum class EBackendEndpoint : uint8
 	None,
 	ServiceStatus,
 	RemoteConfig,
-	PlayerProfile
+	PlayerProfile,
+	Inventory,
+	EquipItem,
+	Progression,
+	UnlockSkill,
+	Matchmaking
 };
 
 /**
@@ -57,6 +62,13 @@ enum class EBackendSimulationScenario : uint8
 	ServiceUnavailable,
 	ProfileRequestFailed,
 	ConfigRequestFailed,
+	InventoryEmpty,
+	InventoryRequestFailed,
+	EquipItemFailed,
+	ProgressionRequestFailed,
+	UnlockSkillFailed,
+	InsufficientSkillPoints,
+	MatchmakingFailed,
 	Timeout
 };
 

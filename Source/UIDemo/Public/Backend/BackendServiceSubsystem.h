@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Backend/BackendTypes.h"
+#include "Backend/InventoryTypes.h"
+#include "Backend/MatchmakingTypes.h"
+#include "Backend/ProgressionTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TimerManager.h"
 #include "BackendServiceSubsystem.generated.h"
@@ -17,6 +20,12 @@ DECLARE_DELEGATE_OneParam(
 DECLARE_DELEGATE_OneParam(
 	FOnPlayerProfileCompleted,
 	const FPlayerProfileResponse&);
+
+DECLARE_DELEGATE_OneParam(FOnInventoryCompleted, const FInventoryResponse&);
+DECLARE_DELEGATE_OneParam(FOnEquipItemCompleted, const FEquipItemResponse&);
+DECLARE_DELEGATE_OneParam(FOnProgressionCompleted, const FProgressionResponse&);
+DECLARE_DELEGATE_OneParam(FOnUnlockSkillCompleted, const FUnlockSkillResponse&);
+DECLARE_DELEGATE_OneParam(FOnMatchmakingCompleted, const FMatchmakingResponse&);
 
 /**
  * Application-facing backend facade.
@@ -54,6 +63,26 @@ public:
 	 */
 	FBackendRequestHandle FetchPlayerProfile(
 		FOnPlayerProfileCompleted Completion);
+
+	FBackendRequestHandle FetchInventory(
+		bool bForceRefresh,
+		FOnInventoryCompleted Completion);
+
+	FBackendRequestHandle EquipItem(
+		FName ItemId,
+		FOnEquipItemCompleted Completion);
+
+	FBackendRequestHandle FetchProgression(
+		bool bForceRefresh,
+		FOnProgressionCompleted Completion);
+
+	FBackendRequestHandle UnlockSkill(
+		FName SkillId,
+		FOnUnlockSkillCompleted Completion);
+
+	FBackendRequestHandle StartMatchmaking(
+		FName PlaylistId,
+		FOnMatchmakingCompleted Completion);
 
 	/**
 	 * Cancels one pending request.
@@ -106,6 +135,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UIDemo|Backend|Simulation")
 	int32 GetActiveRequestCount() const;
 
+	UFUNCTION(BlueprintCallable, Category = "UIDemo|Backend|Cache")
+	void ClearCachedData();
+
 private:
 	FBackendRequestHandle ScheduleRequest(
 		float DelaySeconds,
@@ -123,6 +155,20 @@ private:
 	FPlayerProfileResponse BuildPlayerProfileResponse(
 		EBackendSimulationScenario Scenario) const;
 
+	FInventoryResponse BuildInventoryResponse(
+		EBackendSimulationScenario Scenario) const;
+
+	FProgressionResponse BuildProgressionResponse(
+		EBackendSimulationScenario Scenario) const;
+
+	FMatchmakingResponse BuildMatchmakingResponse(
+		EBackendSimulationScenario Scenario,
+		FName PlaylistId) const;
+
+	void InitializeMockData();
+	void RecalculateSkillAvailability();
+	bool IsCacheValid(double CachedAtSeconds) const;
+
 private:
 	UPROPERTY(Transient)
 	EBackendSimulationScenario SimulationScenario =
@@ -137,4 +183,16 @@ private:
 	int32 NextRequestId = 1;
 
 	TMap<int32, FTimerHandle> ActiveRequests;
+
+	FPlayerProfile MockPlayerProfile;
+	TArray<FInventoryItem> MockInventory;
+	FProgressionData MockProgression;
+
+	bool bHasInventoryCache = false;
+	FInventoryResponse InventoryCache;
+	double InventoryCachedAtSeconds = 0.0;
+
+	bool bHasProgressionCache = false;
+	FProgressionResponse ProgressionCache;
+	double ProgressionCachedAtSeconds = 0.0;
 };
