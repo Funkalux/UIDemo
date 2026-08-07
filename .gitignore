@@ -1,0 +1,38 @@
+# Visual Studio and IDE state
+.vs/
+.idea/
+.vscode/
+*.sln
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Unreal Engine generated directories
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Generated plugin files
+Plugins/**/Binaries/
+Plugins/**/DerivedDataCache/
+Plugins/**/Intermediate/
+
+# Per-user Unreal assets
+Content/Developers/
+
+# Compiler and temporary files
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+*.log
+*.tmp
