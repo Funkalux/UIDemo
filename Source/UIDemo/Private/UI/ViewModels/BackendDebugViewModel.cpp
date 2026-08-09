@@ -4,17 +4,27 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 
-bool UBackendDebugViewModel::Initialize(UObject* WorldContextObject)
+bool UBackendDebugViewModel::Initialize(
+	UObject* WorldContextObject)
 {
-	UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
-	UGameInstance* GameInstance = World != nullptr ? World->GetGameInstance() : nullptr;
+	UWorld* World = IsValid(WorldContextObject)
+		? WorldContextObject->GetWorld()
+		: nullptr;
+
+	UGameInstance* GameInstance = World != nullptr
+		? World->GetGameInstance()
+		: nullptr;
+
 	BackendSubsystem = GameInstance != nullptr
-		? GameInstance->GetSubsystem<UBackendServiceSubsystem>() : nullptr;
+		? GameInstance->GetSubsystem<UBackendServiceSubsystem>()
+		: nullptr;
+
 	Refresh();
 	return IsValid(BackendSubsystem);
 }
 
-void UBackendDebugViewModel::ApplyScenario(const EBackendSimulationScenario NewScenario)
+void UBackendDebugViewModel::ApplyScenario(
+	const EBackendSimulationScenario NewScenario)
 {
 	if (IsValid(BackendSubsystem))
 	{
@@ -23,11 +33,14 @@ void UBackendDebugViewModel::ApplyScenario(const EBackendSimulationScenario NewS
 	}
 }
 
-void UBackendDebugViewModel::ApplyLatency(const float NewLatencySeconds)
+void UBackendDebugViewModel::ApplyLatency(
+	const float NewLatencySeconds)
 {
 	if (IsValid(BackendSubsystem))
 	{
-		BackendSubsystem->SetSimulatedLatencySeconds(NewLatencySeconds);
+		BackendSubsystem->SetSimulatedLatencySeconds(
+			NewLatencySeconds);
+
 		Refresh();
 	}
 }
@@ -56,10 +69,35 @@ void UBackendDebugViewModel::Refresh()
 	{
 		return;
 	}
-	Scenario = BackendSubsystem->GetSimulationScenario();
-	LatencySeconds = BackendSubsystem->GetSimulatedLatencySeconds();
-	ActiveRequestCount = BackendSubsystem->GetActiveRequestCount();
-	UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Scenario);
-	UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(LatencySeconds);
-	UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(ActiveRequestCount);
+
+	const EBackendSimulationScenario NewScenario =
+		BackendSubsystem->GetSimulationScenario();
+
+	if (Scenario != NewScenario)
+	{
+		Scenario = NewScenario;
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Scenario);
+	}
+
+	const float NewLatencySeconds =
+		BackendSubsystem->GetSimulatedLatencySeconds();
+
+	if (!FMath::IsNearlyEqual(
+		LatencySeconds,
+		NewLatencySeconds))
+	{
+		LatencySeconds = NewLatencySeconds;
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(
+			LatencySeconds);
+	}
+
+	const int32 NewActiveRequestCount =
+		BackendSubsystem->GetActiveRequestCount();
+
+	if (ActiveRequestCount != NewActiveRequestCount)
+	{
+		ActiveRequestCount = NewActiveRequestCount;
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(
+			ActiveRequestCount);
+	}
 }

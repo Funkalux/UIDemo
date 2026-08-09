@@ -576,7 +576,7 @@ FRemoteConfigResponse UBackendServiceSubsystem::BuildRemoteConfigResponse(
 		Response.Config.SeasonDisplayName = TEXT("Season One");
 		Response.Config.bIsMatchmakingEnabled = true;
 		Response.Config.bIsInventoryEnabled = true;
-		Response.Config.bIsProgressionEnabled = true;
+		Response.Config.bIsProgressionEnabled = false;
 		Response.Config.ProfileCacheTtlSeconds = 120;
 	}
 	return Response;

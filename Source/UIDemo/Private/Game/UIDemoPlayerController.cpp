@@ -13,15 +13,26 @@ void AUIDemoPlayerController::BeginPlay()
 		return;
 	}
 
-	RootLayout = CreateWidget<UFrontendRootLayout>(this, RootLayoutClass);
+	RootLayout = CreateWidget<UFrontendRootLayout>(
+		this,
+		RootLayoutClass);
+
 	if (!IsValid(RootLayout))
 	{
 		return;
 	}
 
 	RootLayout->AddToViewport(100);
-	if (InitialScreenClass)
+	PushInitialScreen();
+}
+
+UCommonActivatableWidget*
+AUIDemoPlayerController::PushInitialScreen()
+{
+	if (!IsValid(RootLayout) || !InitialScreenClass)
 	{
-		RootLayout->PushScreen(InitialScreenClass);
+		return nullptr;
 	}
+
+	return RootLayout->PushScreen(InitialScreenClass);
 }
