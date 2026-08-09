@@ -9,11 +9,20 @@
 class UFrontendSessionSubsystem;
 class UInventoryItemViewModel;
 
+/** Broadcast after the inventory has rebuilt its item ViewModels. */
+DECLARE_MULTICAST_DELEGATE(FOnInventoryItemsRebuilt);
+
+/** Broadcast when the availability of the equip action changes. */
+DECLARE_MULTICAST_DELEGATE_OneParam(
+	FOnInventoryCanEquipChanged,
+	bool /* bCanEquip */);
+
 /**
  * @brief Screen-level presentation model for inventory browsing and equipment.
  *
- * The ViewModel owns asynchronous request state and item ViewModels while the
- * Widget Blueprint owns list presentation, selection input, and navigation.
+ * The ViewModel owns asynchronous request state, item ViewModels, selection,
+ * and equipment rules. The native screen coordinates UMG focus and navigation
+ * without introducing widget references into this presentation model.
  */
 UCLASS(BlueprintType)
 class UIDEMO_API UInventoryViewModel final : public UMVVMViewModelBase
@@ -54,6 +63,42 @@ public:
 	/** @brief Cancels pending work and returns to the best available stable state. */
 	UFUNCTION(BlueprintCallable, Category = "UIDemo|Inventory")
 	void Cancel();
+
+	/**
+	 * @brief Returns the item currently selected by the inventory presentation.
+	 * @return Selected item ViewModel, or nullptr when no item is selected.
+	 */
+	UInventoryItemViewModel* GetSelectedItem() const
+	{
+		return SelectedItem;
+	}
+
+	/**
+	 * @brief Reports whether the selected item can currently be equipped.
+	 * @return True when the equip action is available.
+	 */
+	bool CanEquipSelectedItem() const
+	{
+		return bCanEquip;
+	}
+
+	/**
+	 * @brief Provides the native notification emitted after item reconstruction.
+	 * @return Mutable multicast delegate used by the owning inventory screen.
+	 */
+	FOnInventoryItemsRebuilt& OnItemsRebuilt()
+	{
+		return ItemsRebuiltEvent;
+	}
+
+	/**
+	 * @brief Provides the native notification for equip-action availability.
+	 * @return Mutable multicast delegate used by the owning inventory screen.
+	 */
+	FOnInventoryCanEquipChanged& OnCanEquipChanged()
+	{
+		return CanEquipChangedEvent;
+	}
 
 protected:
 	/** @brief Cancels pending requests before the ViewModel is destroyed. */
@@ -135,4 +180,10 @@ private:
 	FBackendRequestHandle EquipRequest;
 	/** Identifier used to reject stale asynchronous callbacks. */
 	int32 ActiveAttemptId = 0;
+
+	/** Native notification used to synchronize the virtualized list after rebuilds. */
+	FOnInventoryItemsRebuilt ItemsRebuiltEvent;
+
+	/** Native notification used to keep the CommonUI equip button focusable. */
+	FOnInventoryCanEquipChanged CanEquipChangedEvent;
 };

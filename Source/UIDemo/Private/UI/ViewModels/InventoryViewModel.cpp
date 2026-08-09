@@ -186,6 +186,7 @@ void UInventoryViewModel::RebuildItems(const TArray<FInventoryItem>& SourceItems
 	{
 		SelectItem(Items[0]);
 	}
+	ItemsRebuiltEvent.Broadcast();
 }
 
 void UInventoryViewModel::SetState(const EAsyncViewState NewState)
@@ -221,6 +222,7 @@ void UInventoryViewModel::UpdateCanEquip()
 	{
 		bCanEquip = bNewCanEquip;
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(bCanEquip);
+		CanEquipChangedEvent.Broadcast(bCanEquip);
 	}
 }
 
